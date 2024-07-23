@@ -10,6 +10,7 @@ import ru.kata.spring.boot_security.demo.services.RoleService;
 import ru.kata.spring.boot_security.demo.services.UserService;
 import ru.kata.spring.boot_security.demo.services.UserServiceImp;
 
+import java.security.Principal;
 import java.util.logging.Logger;
 
 @Controller
@@ -22,54 +23,63 @@ public class AdminController {
 
     private static final Logger LOGGER = Logger.getLogger(AdminController.class.getName());
     @Autowired
-    public AdminController(UserServiceImp userService, RoleService roleService) {
+    public AdminController(UserService userService, RoleService roleService) {
         this.userService = userService;
         this.roleService = roleService;
     }
 
+    @GetMapping(value = "/user")
+    public String getAdmin(Model model, Principal principal) {
+        LOGGER.info("Getting admin of users");
+        model.addAttribute("user", userService.findUserByEmail(principal.getName()));
+        return "admin/user";
+    }
+
     @GetMapping
-    public String getListUsers(Model model) {
+    public String getListUsers(Model model, Principal principal) {
         LOGGER.info("Getting list of users");
-        model.addAttribute("list", userService.getListUsers());
+        model.addAttribute("user", userService.findUserByEmail(principal.getName()));
+        model.addAttribute("users", userService.getListUsers());
+        model.addAttribute("newUser", new User());
+        model.addAttribute("allRoles", roleService.getListRoles());
         return "admin/list";
     }
 
     @GetMapping(value = "/edit")
-    public String editUser(@RequestParam(value = "id") Long id,
+    public String editUser(@ModelAttribute(value = "id") Long id,
                            Model model) {
         LOGGER.info("Editing user with id: " + id);
         model.addAttribute("roles", roleService.getListRoles());
         model.addAttribute("user", userService.findUser(id));
-        return "admin/edit";
+        return "admin/list";
     }
 
-    @PostMapping(value = "/update")
-    public String updateUser(@RequestParam(value = "id") Long id, User user) {
+    @PatchMapping(value = "/update")
+    public String updateUser(@ModelAttribute("user") User user, Long id) {
         LOGGER.info("Updating user with id: " + id);
-        userService.updateUser(user,id);
+        userService.updateUser(user, id);
         return "redirect:/admin/";
     }
 
-    @GetMapping(value = "/delete")
-    public String deleteUser(@RequestParam("id") Long id) {
+    @DeleteMapping(value = "/delete")
+    public String deleteUser(@ModelAttribute("id") Long id) {
         LOGGER.info("Deleting user with id: " + id);
         userService.deleteUser(id);
         return "redirect:/admin/";
     }
 
-    @GetMapping(value = "/new")
-    public String newUser(@ModelAttribute("user") User user, Model model) {
-        LOGGER.info("Creating a new user");
-        model.addAttribute("roles", roleService.getListRoles());
-        return "admin/new_user";
-    }
+//    @GetMapping(value = "/new")
+//    public String newUser(@ModelAttribute("user") User user, Model model) {
+//        LOGGER.info("Creating a new user");
+//        model.addAttribute("roles", roleService.getListRoles());
+//        return "admin/new_user";
+//    }
 
     @PostMapping(value = "/save")
     public String saveUser(@ModelAttribute("user") User user) {
         LOGGER.info("Saving a new user");
         String encodedPassword = new BCryptPasswordEncoder(12).encode(user.getPassword());
-        if (!user.getPassword().isBlank()) {
-                user.setPassword(encodedPassword);}
+        user.setPassword(encodedPassword);
         userService.saveUser(user);
         return "redirect:/admin/";
     }

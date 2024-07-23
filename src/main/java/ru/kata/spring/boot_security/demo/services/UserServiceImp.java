@@ -20,15 +20,13 @@ public class UserServiceImp implements UserService, UserDetailsService {
     private final UserRepository userRepository;
 
 
-    @Autowired
     public UserServiceImp(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
 
-
-    public User findUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findUserByUsername(username);
+    public User findUserByEmail(String email) throws UsernameNotFoundException {
+        return userRepository.findUserByEmail(email);
     }
     @Query("Select u from User u left join fetch u.roles")
     public List<User> getListUsers() {
@@ -40,29 +38,23 @@ public class UserServiceImp implements UserService, UserDetailsService {
     }
 
     public void saveUser(User user) {
-        if (!user.getName().isBlank() && !user.getLastname().isBlank() && !user.getUsername().isBlank() && !user.getPassword().isBlank() && (user.getAge() != 0)) {
-            if (findUserByUsername(user.getUsername()) == null) {
-                userRepository.save(user);
-            }
-        }
+        if (!user.getName().isBlank() && !user.getLastname().isBlank() && !user.getEmail().isBlank() &&!user.getPassword().isBlank()) {
+            if (findUserByEmail(user.getUsername()) == null) {
+                userRepository.save(user);}}
     }
-
     public void updateUser(User user, Long id) {
         User updateUser = findUser(id);
-        if (!user.getName().isBlank() && !user.getLastname().isBlank() && !user.getUsername().isBlank() && user.getAge() != 0) {
-            if (user.getPassword().isBlank()) {
-                user.setPassword(updateUser.getPassword());
-                userRepository.save(user);
-            } else {
-                String encodedPassword = new BCryptPasswordEncoder(12).encode(user.getPassword());
-                user.setPassword(encodedPassword);
-                userRepository.save(user);
-            }
+        if (user.getPassword().isBlank()) {
+            user.setPassword(updateUser.getPassword());
+        } else {
+            String encodedPassword = new BCryptPasswordEncoder(12).encode(user.getPassword());
+            user.setPassword(encodedPassword);
         }
+        userRepository.save(user);
     }
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findUserByUsername(username);
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = userRepository.findUserByEmail(email);
         if (user == null) {
             throw new UsernameNotFoundException("User not found");
         }
@@ -74,4 +66,3 @@ public class UserServiceImp implements UserService, UserDetailsService {
         userRepository.delete(findUser(id));
     }
 }
-

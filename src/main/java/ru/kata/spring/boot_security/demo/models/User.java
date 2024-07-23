@@ -26,17 +26,17 @@ public class User implements UserDetails {
     private String password;
 
     @NotNull
-    private String username;
+    private String email;
     @ManyToMany(fetch = FetchType.LAZY)
     private Set<Role> roles;
 
-    public User(Long id, int age, String lastname, String name, String password, String username, Set<Role> roles) {
+    public User(Long id, int age, String lastname, String name, String password, String email, Set<Role> roles) {
         this.id = id;
         this.name = name;
         this.lastname = lastname;
         this.age = age;
         this.password = password;
-        this.username = username;
+        this.email = email;
         this.roles = roles;
     }
     public User() {}
@@ -51,8 +51,13 @@ public class User implements UserDetails {
         return password;
     }
 
+    @Override
     public String getUsername() {
-        return username;
+        return email;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     @Override
@@ -75,8 +80,8 @@ public class User implements UserDetails {
         return true;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public Set<Role> getRoles() {

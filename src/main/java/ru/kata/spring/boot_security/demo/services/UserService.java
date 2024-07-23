@@ -9,7 +9,7 @@ import java.util.List;
 @Service
 public interface UserService {
 
-    User findUserByUsername(String username);
+    User findUserByEmail(String email);
 
     UserDetails loadUserByUsername(String username);
 
@@ -20,6 +20,6 @@ public interface UserService {
     User findUser(Long id);
 
     void deleteUser(Long id);
+    void updateUser(User user, Long id);
 
-    public void updateUser(User user, Long id);
 }
