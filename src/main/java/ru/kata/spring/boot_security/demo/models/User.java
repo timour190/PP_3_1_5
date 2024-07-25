@@ -1,8 +1,6 @@
 package ru.kata.spring.boot_security.demo.models;
 
 import com.sun.istack.NotNull;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,34 +17,45 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
-    private String lastname;
-    private int age;
+
+    private String firstName;
+
+    private String lastName;
+
+    private Byte age;
+
     @NotNull
     private String password;
 
     @NotNull
     private String email;
-    @ManyToMany(fetch = FetchType.LAZY)
+
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = CascadeType.MERGE)
     private Set<Role> roles;
 
-    public User(Long id, int age, String lastname, String name, String password, String email, Set<Role> roles) {
+    public User(Long id, Byte age, String lastName, String firstName, String password, String email, Set<Role> roles) {
         this.id = id;
-        this.name = name;
-        this.lastname = lastname;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.age = age;
         this.password = password;
         this.email = email;
         this.roles = roles;
     }
-    public User() {}
+
+    public User() {
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream().map(role -> new SimpleGrantedAuthority(role.getAuthority())).collect(Collectors.toList());
     }
+
     public void setPassword(String password) {
         this.password = password;
     }
+
     public String getPassword() {
         return password;
     }
@@ -54,6 +63,10 @@ public class User implements UserDetails {
     @Override
     public String getUsername() {
         return email;
+    }
+
+    public String setEmail() {
+        return this.email = email;
     }
 
     public String getEmail() {
@@ -100,27 +113,27 @@ public class User implements UserDetails {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
     public int getAge() {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(Byte age) {
         this.age = age;
     }
 
-    public String getLastname() {
-        return lastname;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setLastname(String lastname) {
-        this.lastname = lastname;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 }
